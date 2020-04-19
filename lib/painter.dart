@@ -104,6 +104,10 @@ class _PathHistory{
   Paint _backgroundPaint;
   bool _inDrag;
 
+  int historySize() {
+    return _paths.length;
+  }
+
   _PathHistory(){
     _paths=new List<MapEntry<Path,Paint>>();
     _inDrag=false;
@@ -184,6 +188,10 @@ class PainterController extends ChangeNotifier{
 
   PainterController(){
     _pathHistory=new _PathHistory();
+  }
+
+  bool hasHistory() {
+  return _pathHistory.historySize() != 0;
   }
 
   Color get drawColor => _drawColor;
