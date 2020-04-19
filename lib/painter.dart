@@ -103,6 +103,7 @@ class _PathHistory{
   Paint currentPaint;
   Paint _backgroundPaint;
   bool _inDrag;
+  Function _onDrawStepListener;
 
   int historySize() {
     return _paths.length;
@@ -112,6 +113,10 @@ class _PathHistory{
     _paths=new List<MapEntry<Path,Paint>>();
     _inDrag=false;
     _backgroundPaint=new Paint();
+  }
+
+  void setOnDrawStepListener(Function onDrawListener) {
+    _onDrawStepListener = onDrawListener;
   }
 
   void setBackgroundColor(Color backgroundColor){
@@ -130,12 +135,17 @@ class _PathHistory{
     }
   }
 
+  void _triggerOnDrawStepListener() {
+    _onDrawStepListener?.call();
+  }
+
   void add(Offset startPoint){
     if(!_inDrag) {
       _inDrag=true;
       Path path = new Path();
       path.moveTo(startPoint.dx, startPoint.dy);
       _paths.add(new MapEntry<Path, Paint>(path, currentPaint));
+      _triggerOnDrawStepListener();
     }
   }
 
@@ -188,6 +198,10 @@ class PainterController extends ChangeNotifier{
 
   PainterController(){
     _pathHistory=new _PathHistory();
+  }
+
+  void setOnDrawStepListener(Function onDrawStepListener) {
+    _pathHistory.setOnDrawStepListener(onDrawStepListener);
   }
 
   bool hasHistory() {
