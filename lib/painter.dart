@@ -296,7 +296,7 @@ class PainterController extends ChangeNotifier {
 
   List<PathHistoryEntry> _derializeHistory(String serializedHistory) {
     if (serializedHistory != null) {
-      return json.decode(serializedHistory) as List<PathHistoryEntry>;
+      return (jsonDecode(serializedHistory) as List).map((entry) => PathHistoryEntry.fromJson(entry)).toList();
     } else {
       return null;
     }
