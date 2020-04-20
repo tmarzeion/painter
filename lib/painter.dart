@@ -101,9 +101,48 @@ class _PainterPainter extends CustomPainter{
 
 }
 
+class PathHistoryEntry {
+
+  double pathDx;
+  double pathDy;
+
+  List<MapEntry<double, double>> lineToList = new List();
+
+  Color paintColor;
+  int paintBlendMode;
+  double paintThickness;
+
+  PathHistoryEntry(this.pathDx, this.pathDy, this.paintColor,
+      this.paintBlendMode, this.paintThickness);
+
+  Paint extractPaint() {
+    Paint paint=new Paint();
+    paint.color = paintColor;
+    paint.blendMode = BlendMode.values[paintBlendMode];
+    paint.strokeWidth=paintThickness;
+    paint.style=PaintingStyle.stroke;
+
+    return paint;
+  }
+
+  Path extractPath() {
+    Path path = new Path();
+    path.moveTo(pathDx, pathDy);
+
+    for (var entry in lineToList) {
+      path.lineTo(entry.key, entry.value);
+    }
+    return path;
+  }
+
+  MapEntry<Path,Paint> convertToPathHistoryFormat() {
+    return MapEntry(extractPath(), extractPaint());
+  }
+}
+
 class _PathHistory{
 
-  List<MapEntry<Path,Paint>> _paths;
+  List<PathHistoryEntry> _paths;
   Paint currentPaint;
   Paint _backgroundPaint;
   bool _inDrag;
@@ -114,11 +153,11 @@ class _PathHistory{
   }
 
 
-  _PathHistory(List<MapEntry<Path,Paint>> paths){
+  _PathHistory(List<PathHistoryEntry> paths){
     if (paths != null) {
       _paths = paths;
     } else {
-      _paths=new List<MapEntry<Path,Paint>>();
+      _paths=new List<PathHistoryEntry>();
     }
     _inDrag=false;
     _backgroundPaint=new Paint();
@@ -154,15 +193,17 @@ class _PathHistory{
       _inDrag=true;
       Path path = new Path();
       path.moveTo(startPoint.dx, startPoint.dy);
-      _paths.add(new MapEntry<Path, Paint>(path, currentPaint));
+      PathHistoryEntry pathHistoryEntry = new PathHistoryEntry(startPoint.dx, startPoint.dy, currentPaint.color, currentPaint.blendMode.index, currentPaint.strokeWidth);
+      _paths.add(pathHistoryEntry);
       _triggerOnDrawStepListener();
     }
   }
 
   void updateCurrent(Offset nextPoint) {
-    if (_inDrag) {
-      Path path=_paths.last.key;
+    if (_inDrag) { //TODO
+      Path path=_paths.last.extractPath();
       path.lineTo(nextPoint.dx, nextPoint.dy);
+      _paths.last.lineToList.add(MapEntry(nextPoint.dx, nextPoint.dy));
     }
   }
 
@@ -173,8 +214,9 @@ class _PathHistory{
   void draw(Canvas canvas,Size size){
     canvas.saveLayer(Offset.zero & size, Paint());
     canvas.drawRect(new Rect.fromLTWH(0.0, 0.0, size.width, size.height), _backgroundPaint);
-    for(MapEntry<Path,Paint> path in _paths){
-      canvas.drawPath(path.key,path.value);
+    for(PathHistoryEntry path in _paths){
+      MapEntry<Path,Paint> oldModel = path.convertToPathHistoryFormat();
+      canvas.drawPath(oldModel.key, oldModel.value);
     }
     canvas.restore();
   }
@@ -225,9 +267,9 @@ class PainterController extends ChangeNotifier{
     return jsonEncode(_pathHistory._paths);
   }
 
-  List<MapEntry<Path,Paint>> _derializeHistory(String serializedHistory) {
+  List<PathHistoryEntry> _derializeHistory(String serializedHistory) {
     if (serializedHistory != null) {
-      return json.decode(serializedHistory) as List<MapEntry<Path,Paint>>;
+      return json.decode(serializedHistory) as List<PathHistoryEntry>;
     } else {
       return null;
     }

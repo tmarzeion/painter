@@ -34,7 +34,7 @@ class _ExamplePageState extends State<ExamplePage> {
   }
 
   PainterController _newController(){
-    PainterController controller=new PainterController();
+    PainterController controller=new PainterController(null);
     controller.thickness=5.0;
     controller.backgroundColor=Colors.green;
     return controller;
