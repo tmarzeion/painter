@@ -1,5 +1,7 @@
 library painter;
 
+import 'dart:convert';
+
 import 'package:flutter/widgets.dart' hide Image;
 import 'dart:ui';
 import 'dart:async';
@@ -111,10 +113,16 @@ class _PathHistory{
     return _paths.length;
   }
 
-  _PathHistory(){
-    _paths=new List<MapEntry<Path,Paint>>();
+
+  _PathHistory(List<MapEntry<Path,Paint>> paths){
+    if (paths != null) {
+      _paths = paths;
+    } else {
+      _paths=new List<MapEntry<Path,Paint>>();
+    }
     _inDrag=false;
     _backgroundPaint=new Paint();
+
   }
 
   void setOnDrawStepListener(Function onDrawListener) {
@@ -201,8 +209,22 @@ class PainterController extends ChangeNotifier{
   _PathHistory _pathHistory;
   ValueGetter<Size> _widgetFinish;
 
-  PainterController(){
-    _pathHistory=new _PathHistory();
+  PainterController({this.history}){
+    _pathHistory=new _PathHistory(_derializeHistory(history));
+  }
+
+  String history;
+
+  String serializeHistory(List<MapEntry<Path,Paint>> deserializedHistory) {
+    return jsonEncode(deserializedHistory);
+  }
+
+  List<MapEntry<Path,Paint>> _derializeHistory(String serializedHistory) {
+    if (serializedHistory != null) {
+      return json.decode(serializedHistory) as List<MapEntry<Path,Paint>>;
+    } else {
+      return null;
+    }
   }
 
   void setOnDrawStepListener(Function onDrawStepListener) {
