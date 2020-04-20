@@ -213,6 +213,8 @@ class PainterController extends ChangeNotifier{
     return _pathHistory.historySize() != 0;
   }
 
+  // setter for erase mode.
+  // Note: Works only for transparent background
   bool get eraseMode => _eraseMode;
   set eraseMode(bool enabled) {
     _eraseMode = enabled;
