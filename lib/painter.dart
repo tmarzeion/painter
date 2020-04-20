@@ -209,14 +209,20 @@ class PainterController extends ChangeNotifier{
   _PathHistory _pathHistory;
   ValueGetter<Size> _widgetFinish;
 
-  PainterController({this.history}){
+  PainterController(String history){
+    _setHistory(history);
+  }
+
+  String get history {
+    return _serializeHistory();
+  }
+
+  void _setHistory(String history) {
     _pathHistory=new _PathHistory(_derializeHistory(history));
   }
 
-  String history;
-
-  String serializeHistory(List<MapEntry<Path,Paint>> deserializedHistory) {
-    return jsonEncode(deserializedHistory);
+  String _serializeHistory() {
+    return jsonEncode(_pathHistory._paths);
   }
 
   List<MapEntry<Path,Paint>> _derializeHistory(String serializedHistory) {
