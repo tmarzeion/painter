@@ -7,6 +7,10 @@ homepage: https://github.com/epnw/painter
 dependencies:
   flutter:
     sdk: flutter
+  json_serializable: ^3.3.0
+
+dev_dependencies:
+  build_runner:
 
 environment:
   sdk: ">=2.0.0-dev.28.0 <3.0.0"
