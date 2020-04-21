@@ -241,7 +241,11 @@ class _PathHistory {
         new Rect.fromLTWH(0.0, 0.0, size.width, size.height), _backgroundPaint);
     for (PathHistoryEntry path in _paths) {
       MapEntry<Path, Paint> oldModel = path.convertToPathHistoryFormat();
+      canvas.drawCircle(Offset(path.pathDx, path.pathDy), 0.1, oldModel.value);
       canvas.drawPath(oldModel.key, oldModel.value);
+      if (path.lineToList.isNotEmpty) {
+        canvas.drawCircle(Offset(path.lineToList.last.x, path.lineToList.last.y), 0.1, oldModel.value);
+      }
     }
     canvas.restore();
   }
