@@ -78,8 +78,10 @@ class _PainterState extends State<Painter> {
   }
 
   void _onPanEnd(DragEndDetails end) {
+    widget.painterController._pathHistory._filterBlankHistory();
     widget.painterController._pathHistory.endCurrent();
     widget.painterController._notifyListeners();
+    widget.painterController._onDrawStepListener?.call();
   }
 }
 
@@ -169,6 +171,24 @@ class _PathHistory {
     return _paths.length;
   }
 
+  void _filterBlankHistory() {
+    List<PathHistoryEntry> result = new List();
+    for (var path in _paths) {
+      if (path.lineToList.isNotEmpty) {
+        Point initialPoint = path.lineToList.first;
+        for(var point in path.lineToList) {
+          if (point.x != initialPoint.x || point.y != initialPoint.y) {
+            result.add(path);
+            break;
+          }
+        }
+      } else {
+        continue;
+      }
+    }
+    _paths = result;
+  }
+
   _PathHistory(List<PathHistoryEntry> paths) {
     if (paths != null) {
       _paths = paths;
@@ -199,10 +219,6 @@ class _PathHistory {
     }
   }
 
-  void _triggerOnDrawStepListener() {
-    _onDrawStepListener?.call();
-  }
-
   void add(Offset startPoint) {
     if (!_inDrag) {
       _inDrag = true;
@@ -218,7 +234,6 @@ class _PathHistory {
           currentPaint.blendMode.index,
           currentPaint.strokeWidth);
       _paths.add(pathHistoryEntry);
-      _triggerOnDrawStepListener();
     }
   }
 
@@ -277,6 +292,7 @@ class PainterController extends ChangeNotifier {
   PictureDetails _cached;
   _PathHistory _pathHistory;
   ValueGetter<Size> _widgetFinish;
+  Function _onDrawStepListener;
 
   PainterController(String history) {
     _setHistory(history);
@@ -303,7 +319,7 @@ class PainterController extends ChangeNotifier {
   }
 
   void setOnDrawStepListener(Function onDrawStepListener) {
-    _pathHistory.setOnDrawStepListener(onDrawStepListener);
+    this._onDrawStepListener = onDrawStepListener;
   }
 
   bool hasHistory() {
