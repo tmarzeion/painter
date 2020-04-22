@@ -73,7 +73,7 @@ class _PainterState extends State<Painter> {
   void _onPanUpdate(DragUpdateDetails update) {
     Offset pos = (context.findRenderObject() as RenderBox)
         .globalToLocal(update.globalPosition);
-    widget.painterController._pathHistory.updateCurrent(pos);
+    widget.painterController._pathHistory.updateCurrent(pos, widget.painterController.compressionLevel);
     widget.painterController._notifyListeners();
   }
 
@@ -237,11 +237,11 @@ class _PathHistory {
     }
   }
 
-  void updateCurrent(Offset nextPoint) {
+  void updateCurrent(Offset nextPoint, int compressionLevel) {
     if (_inDrag) {
       if (_paths.last.lineToList.isNotEmpty) {
         Offset prevOffset = Offset(_paths.last.lineToList.last.x, _paths.last.lineToList.last.y);
-        if ((prevOffset - nextPoint).distance > _paths.last.paintThickness/16) {
+        if ((prevOffset - nextPoint).distance > _paths.last.paintThickness/compressionLevel) {
           Path path = _paths.last.extractPath();
           path.lineTo(nextPoint.dx, nextPoint.dy);
           _paths.last.lineToList.add(Point(nextPoint.dx, nextPoint.dy));
@@ -295,6 +295,7 @@ class PainterController extends ChangeNotifier {
   Color _drawColor = new Color.fromARGB(255, 0, 0, 0);
   Color _backgroundColor = new Color.fromARGB(255, 255, 255, 255);
   bool _eraseMode = false;
+  int compressionLevel = 4;
 
   double _thickness = 1.0;
   PictureDetails _cached;
@@ -302,7 +303,7 @@ class PainterController extends ChangeNotifier {
   ValueGetter<Size> _widgetFinish;
   Function _onDrawStepListener;
 
-  PainterController(String history) {
+  PainterController(String history, {this.compressionLevel}) {
     _setHistory(history);
   }
 
