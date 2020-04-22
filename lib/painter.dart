@@ -239,10 +239,18 @@ class _PathHistory {
 
   void updateCurrent(Offset nextPoint) {
     if (_inDrag) {
-      //TODO
-      Path path = _paths.last.extractPath();
-      path.lineTo(nextPoint.dx, nextPoint.dy);
-      _paths.last.lineToList.add(Point(nextPoint.dx, nextPoint.dy));
+      if (_paths.last.lineToList.isNotEmpty) {
+        Offset prevOffset = Offset(_paths.last.lineToList.last.x, _paths.last.lineToList.last.y);
+        if ((prevOffset - nextPoint).distance > _paths.last.paintThickness/16) {
+          Path path = _paths.last.extractPath();
+          path.lineTo(nextPoint.dx, nextPoint.dy);
+          _paths.last.lineToList.add(Point(nextPoint.dx, nextPoint.dy));
+        }
+      } else {
+        Path path = _paths.last.extractPath();
+        path.lineTo(nextPoint.dx, nextPoint.dy);
+        _paths.last.lineToList.add(Point(nextPoint.dx, nextPoint.dy));
+      }
     }
   }
 
