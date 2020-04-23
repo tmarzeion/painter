@@ -82,6 +82,7 @@ class _PainterState extends State<Painter> {
     widget.painterController._pathHistory.endCurrent();
     widget.painterController._notifyListeners();
     widget.painterController._onDrawStepListener?.call();
+    widget.painterController._onHistoryUpdatedListener?.call();
   }
 }
 
@@ -302,6 +303,7 @@ class PainterController extends ChangeNotifier {
   _PathHistory _pathHistory;
   ValueGetter<Size> _widgetFinish;
   Function _onDrawStepListener;
+  Function _onHistoryUpdatedListener;
 
   PainterController(String history, {this.compressionLevel}) {
     _setHistory(history);
@@ -329,6 +331,10 @@ class PainterController extends ChangeNotifier {
 
   void setOnDrawStepListener(Function onDrawStepListener) {
     this._onDrawStepListener = onDrawStepListener;
+  }
+
+  void setOnHistoryUpdatedListener(Function onHistoryUpdatedListener) {
+    this._onHistoryUpdatedListener = onHistoryUpdatedListener;
   }
 
   bool hasHistory() {
